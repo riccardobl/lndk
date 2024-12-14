@@ -289,6 +289,7 @@ pub struct PayOfferParams {
     /// The amount of time in seconds that we will wait for the offer creator to respond with
     /// an invoice. If not provided, we will use the default value of 15 seconds.
     pub response_invoice_timeout: Option<u32>,
+    pub max_fee: Option<u64>,
 }
 
 impl OfferHandler {
@@ -312,9 +313,9 @@ impl OfferHandler {
     /// offer.
     pub async fn pay_offer(&self, cfg: PayOfferParams) -> Result<Payment, OfferError> {
         let client_clone = cfg.client.clone();
+        let max_fee: Option<u64> = cfg.max_fee.clone();
         let (invoice, validated_amount, payment_id) = self.get_invoice(cfg).await?;
-
-        self.pay_invoice(client_clone, validated_amount, &invoice, payment_id)
+        self.pay_invoice(client_clone, validated_amount, &invoice, payment_id, max_fee)
             .await
     }
 
@@ -385,6 +386,7 @@ impl OfferHandler {
         amount: u64,
         invoice: &Bolt12Invoice,
         payment_id: PaymentId,
+        max_fee: Option<u64>,
     ) -> Result<Payment, OfferError> {
         let payment_hash = invoice.payment_hash();
         let path_info = invoice.payment_paths()[0].clone();
@@ -397,6 +399,7 @@ impl OfferHandler {
             payment_hash: payment_hash.0,
             msats: amount,
             payment_id,
+            max_fee,
         };
 
         let intro_node_id = match params.path.introduction_node {

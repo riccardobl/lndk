@@ -114,6 +114,7 @@ impl Offers for LNDKServer {
             destination,
             reply_path: Some(reply_path),
             response_invoice_timeout: inner_request.response_invoice_timeout,
+            max_fee: inner_request.max_fee,
         };
 
         let payment = match self.offer_handler.pay_offer(cfg).await {
@@ -208,6 +209,7 @@ impl Offers for LNDKServer {
             destination,
             reply_path: Some(reply_path),
             response_invoice_timeout: inner_request.response_invoice_timeout,
+            max_fee: None,
         };
 
         let (invoice, _, payment_id) = match self.offer_handler.get_invoice(cfg).await {
@@ -270,9 +272,10 @@ impl Offers for LNDKServer {
             Err(e) => return Err(Status::invalid_argument(e.to_string())),
         };
         let payment_id = PaymentId(self.offer_handler.messenger_utils.get_secure_random_bytes());
+        let max_fee: Option<u64> = inner_request.max_fee.into();
         let invoice = match self
             .offer_handler
-            .pay_invoice(client, amount, &invoice, payment_id)
+            .pay_invoice(client, amount, &invoice, payment_id, max_fee)
             .await
         {
             Ok(invoice) => {

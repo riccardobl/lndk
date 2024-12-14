@@ -58,6 +58,7 @@ async fn create_offers(
             destination: Destination::BlindedPath(blinded_path),
             reply_path: Some(reply_path),
             response_invoice_timeout: None,
+            max_fee: None,
         };
 
         pay_cfgs.push(pay_cfg);
@@ -344,6 +345,7 @@ async fn test_lndk_pay_offer() {
         destination: Destination::BlindedPath(blinded_path.clone()),
         reply_path: Some(reply_path),
         response_invoice_timeout: None,
+        max_fee: None
     };
     select! {
         val = messenger.run(lndk_cfg.clone(), Arc::clone(&handler)) => {
@@ -401,6 +403,7 @@ async fn test_lndk_pay_offer_concurrently() {
         destination: Destination::BlindedPath(blinded_path.clone()),
         reply_path: Some(reply_path),
         response_invoice_timeout: None,
+        max_fee: None,
     };
     // Let's also try to pay the same offer multiple times concurrently.
     select! {

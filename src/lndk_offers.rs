@@ -329,8 +329,18 @@ impl OfferHandler {
             .await
             .map_err(OfferError::RouteFailure)?;
 
+        let route: Route = resp.routes[0].clone();
+        if let Some(max_fee) = params.max_fee {
+            let route_fee = route.total_fees_msat as u64;
+            if route_fee > max_fee {
+                return Err(OfferError::RouteFailure(Status::unknown(
+                    "Route fee is greater than max fee",
+                )));
+            }
+        }
+
         let _ = payer
-            .send_to_route(params.payment_hash, resp.routes[0].clone())
+            .send_to_route(params.payment_hash, route)
             .await
             .map_err(OfferError::RouteFailure)?;
 
@@ -357,6 +367,7 @@ pub struct SendPaymentParams {
     pub payment_hash: [u8; 32],
     pub msats: u64,
     pub payment_id: PaymentId,
+    pub max_fee: Option<u64>,
 }
 
 /// Checks that the user-provided amount matches the provided offer or invoice.
@@ -1239,6 +1250,7 @@ mod tests {
             payment_hash: payment_hash,
             msats: 2000,
             payment_id,
+            max_fee: None,
         };
         assert!(handler.send_payment(payer_mock, params).await.is_ok());
     }
@@ -1263,6 +1275,7 @@ mod tests {
             payment_hash: payment_hash,
             msats: 2000,
             payment_id,
+            max_fee: None,
         };
         assert!(handler.send_payment(payer_mock, params).await.is_err());
     }
@@ -1297,6 +1310,7 @@ mod tests {
             payment_hash: payment_hash,
             msats: 2000,
             payment_id,
+            max_fee: None,
         };
         assert!(handler.send_payment(payer_mock, params).await.is_err());
     }

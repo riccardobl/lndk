@@ -215,6 +215,7 @@ async fn main() {
                 amount,
                 payer_note,
                 response_invoice_timeout,
+                max_fee: None,
             });
             add_metadata(&mut request, macaroon).unwrap_or_else(|_| exit(1));
 
@@ -314,6 +315,7 @@ async fn main() {
             let mut request = Request::new(PayInvoiceRequest {
                 invoice: invoice_string.to_owned(),
                 amount,
+                max_fee: None,
             });
             add_metadata(&mut request, macaroon).unwrap_or_else(|_| exit(1));
             match client.pay_invoice(request).await {

@@ -1,6 +1,6 @@
 [package]
 name = "lndk"
-version = "0.2.0-maxfee"
+version = "0.2.0-maxfeetest"
 edition = "2021"
 repository = "https://github.com/lndk-org/lndk"
 

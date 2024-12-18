@@ -332,7 +332,7 @@ impl OfferHandler {
         let route: Route = resp.routes[0].clone();
         if let Some(max_fee) = params.max_fee {
             let route_fee = route.total_fees_msat as u64;
-            if route_fee > max_fee {
+            if route_fee >= max_fee {
                 return Err(OfferError::RouteFailure(Status::unknown(
                     "Route fee is greater than max fee",
                 )));
